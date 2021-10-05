@@ -771,18 +771,16 @@ impl super::Client {
         purchase_units: Option<Vec<PurchaseUnit>>,
     ) -> Result<(), ResponseError> {
         let mut intent_json = String::new();
-        let units_json = String::new();
+        let mut units_json = String::new();
 
         if let Some(p_units) = purchase_units {
-            let mut units_json = String::new();
-
             for (i, unit) in p_units.iter().enumerate() {
                 let unit_str = serde_json::to_string(&unit).expect("error serializing purchase unit");
                 let mut unit_json = format!(
                     r#"
                 {{
                     "op": "replace",
-                    "path": "/purchase_units/@reference_id='{reference_id}'",
+                    "path": "/purchase_units/@reference_id=='{reference_id}'",
                     "value": {unit}
                 }}
                 "#,
