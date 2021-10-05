@@ -225,9 +225,17 @@ impl Default for ItemCategoryType {
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ShippingDetail {
     /// The name of the person to whom to ship the items. Supports only the full_name property.
-    pub name: Option<String>,
+    pub name: Option<Name>,
     /// The address of the person to whom to ship the items.
     pub address: Option<Address>,
+}
+
+/// The name and address of the person to whom to ship the items.
+#[skip_serializing_none]
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct Name {
+    /// When the party is a person, the party's full name.
+    pub full_name: String,
 }
 
 /// Represents an item.
@@ -749,7 +757,11 @@ impl super::Client {
         let res = builder.send().await?;
 
         if res.status().is_success() {
-            let order = res.json::<Order>().await?;
+            let json: serde_json::Value = res.json().await?;
+
+            eprintln!("{:#}", json);
+
+            let order = serde_json::from_value(json).unwrap();
             Ok(order)
         } else {
             Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
