@@ -348,12 +348,54 @@ pub enum CaptureStatusDetails {
 
 /// A captured payment.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Capture {
     /// The status of the captured payment.
     pub status: CaptureStatus,
     /// The details of the captured payment status.
     pub status_details: Option<CaptureStatusDetails>,
+    /// The PayPal-generated ID for the captured payment.
+    pub id: String,
+    /// The detailed breakdown of the capture activity. This is not available for transactions that are in pending state.
+    pub seller_receivable_breakdown: Option<SellerReceivableBreakdown>,
+}
+
+/// The detailed breakdown of the capture activity. This is not available for transactions that are in pending state.
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SellerReceivableBreakdown {
+    /// The amount for this captured payment in the currency of the transaction.
+    pub gross_amount: Amount,
+    /// The applicable fee for this captured payment in the currency of the transaction.
+    pub paypal_fee: Option<Amount>,
+    /// The applicable fee for this captured payment in the receivable currency.
+    /// Returned only in cases the fee is charged in the receivable currency. Example 'CNY'.
+    pub paypal_fee_in_receivable_currency: Option<Amount>,
+    /// The net amount that the payee receives for this captured payment in their PayPal account.
+    /// The net amount is computed as gross_amount minus the paypal_fee minus the platform_fees.
+    pub net_amount: Option<Amount>,
+    /// The net amount that is credited to the payee's PayPal account. Returned only when the
+    /// currency of the captured payment is different from the currency of the PayPal account
+    /// where the payee wants to credit the funds. The amount is computed as net_amount times exchange_rate.
+    pub receivable_amount: Option<Amount>,
+    /// The exchange rate that determines the amount that is credited to the payee's PayPal account.
+    /// Returned when the currency of the captured payment is different from the currency of the PayPal
+    /// account where the payee wants to credit the funds.
+    pub exchange_rate: Option<ExchangeRate>,
+}
+
+/// The exchange rate that determines the amount that is credited to the payee's PayPal account.
+/// Returned when the currency of the captured payment is different from the currency of the PayPal
+/// account where the payee wants to credit the funds.
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ExchangeRate {
+    /// The source currency from which to convert an amount.
+    pub source_currency: Currency,
+    /// The target currency to which to convert an amount.
+    pub target_currency: Currency,
+    /// The target currency amount. Equivalent to one unit of the source currency. Formatted as integer or decimal value with one to 15 digits to the right of the decimal point.
+    pub value: String,
 }
 
 /// The status of the refund
