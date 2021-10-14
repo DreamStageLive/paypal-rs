@@ -799,11 +799,7 @@ impl super::Client {
         let res = builder.send().await?;
 
         if res.status().is_success() {
-            let json: serde_json::Value = res.json().await?;
-
-            eprintln!("{:#}", json);
-
-            let order = serde_json::from_value(json).unwrap();
+            let order: Order = res.json().await?;
             Ok(order)
         } else {
             Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
