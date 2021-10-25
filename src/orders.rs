@@ -424,7 +424,7 @@ pub struct Refund {
     /// The status of the refund.
     pub status: RefundStatus,
     /// The details of the refund status.
-    pub status_details: RefundStatusDetails,
+    pub status_details: Option<RefundStatusDetails>,
 }
 
 /// The comprehensive history of payments for the purchase unit.
