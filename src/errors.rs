@@ -39,6 +39,8 @@ pub enum ResponseError {
     ApiError(PaypalError),
     /// A http error.
     HttpError(reqwest::Error),
+    /// A json error.
+    JsonError(serde_json::Error),
 }
 
 impl fmt::Display for ResponseError {
@@ -46,6 +48,7 @@ impl fmt::Display for ResponseError {
         match self {
             ResponseError::ApiError(e) => write!(f, "{}", e),
             ResponseError::HttpError(e) => write!(f, "{}", e),
+            ResponseError::JsonError(e) => write!(f, "{}", e),
         }
     }
 }
@@ -55,6 +58,7 @@ impl Error for ResponseError {
         match self {
             ResponseError::ApiError(e) => Some(e),
             ResponseError::HttpError(e) => Some(e),
+            ResponseError::JsonError(e) => Some(e),
         }
     }
 }
@@ -70,6 +74,13 @@ impl From<PaypalError> for ResponseError {
 impl From<reqwest::Error> for ResponseError {
     fn from(e: reqwest::Error) -> Self {
         ResponseError::HttpError(e)
+    }
+}
+
+// Implemented so we can use ? directly on it.
+impl From<serde_json::Error> for ResponseError {
+    fn from(e: serde_json::Error) -> Self {
+        ResponseError::JsonError(e)
     }
 }
 

@@ -779,7 +779,7 @@ impl super::Client {
         &mut self,
         order: OrderPayload,
         header_params: HeaderParams,
-    ) -> Result<Order, ResponseError> {
+    ) -> Result<(Order, serde_json::Value), ResponseError> {
         let builder = {
             self.setup_headers(
                 self.client.post(&format!("{}/v2/checkout/orders", self.endpoint())),
@@ -790,8 +790,8 @@ impl super::Client {
         let res = builder.json(&order).send().await?;
 
         if res.status().is_success() {
-            let order = res.json::<Order>().await?;
-            Ok(order)
+            let json: serde_json::Value = res.json().await?;
+            Ok((serde_json::from_value(json.clone())?, json))
         } else {
             Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
         }
@@ -804,7 +804,7 @@ impl super::Client {
         endpoint: &str,
         post: bool,
         header_params: crate::HeaderParams,
-    ) -> Result<Order, ResponseError> {
+    ) -> Result<(Order, serde_json::Value), ResponseError> {
         let format = format!("{}/v2/checkout/orders/{}/{}", self.endpoint(), order_id, endpoint);
 
         let builder = self
@@ -820,8 +820,8 @@ impl super::Client {
         let res = builder.send().await?;
 
         if res.status().is_success() {
-            let order: Order = res.json().await?;
-            Ok(order)
+            let json: serde_json::Value = res.json().await?;
+            Ok((serde_json::from_value(json.clone())?, json))
         } else {
             Err(ResponseError::ApiError(res.json::<PaypalError>().await?))
         }
@@ -915,7 +915,7 @@ impl super::Client {
     }
 
     /// Shows details for an order, by ID.
-    pub async fn show_order_details(&mut self, order_id: &str) -> Result<Order, ResponseError> {
+    pub async fn show_order_details(&mut self, order_id: &str) -> Result<(Order, serde_json::Value), ResponseError> {
         self.build_endpoint_order(order_id, "", false, HeaderParams::default())
             .await
     }
@@ -927,7 +927,7 @@ impl super::Client {
         &mut self,
         order_id: &str,
         header_params: crate::HeaderParams,
-    ) -> Result<Order, ResponseError> {
+    ) -> Result<(Order, serde_json::Value), ResponseError> {
         self.build_endpoint_order(order_id, "capture", true, header_params)
             .await
     }
@@ -939,7 +939,7 @@ impl super::Client {
         &mut self,
         order_id: &str,
         header_params: HeaderParams,
-    ) -> Result<Order, ResponseError> {
+    ) -> Result<(Order, serde_json::Value), ResponseError> {
         self.build_endpoint_order(order_id, "authorize", true, header_params)
             .await
     }

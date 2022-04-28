@@ -891,7 +891,7 @@ impl super::Client {
 
 #[cfg(test)]
 mod tests {
-    use crate::{invoice::*, Client, HeaderParams};
+    use crate::{Client, HeaderParams};
 
     async fn create_client() -> Client {
         dotenv::dotenv().ok();

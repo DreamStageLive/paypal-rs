@@ -40,7 +40,7 @@
 //!         vec![PurchaseUnit::new(Amount::new(Currency::EUR, "10.0"))],
 //!     );
 //!
-//!     let order = client
+//!     let (order, _) = client
 //!         .create_order(
 //!             order_payload,
 //!             HeaderParams::default(),
@@ -91,7 +91,10 @@ use reqwest::header;
 use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use std::{borrow::Cow, time::{Duration, Instant}};
+use std::{
+    borrow::Cow,
+    time::{Duration, Instant},
+};
 
 /// The paypal api endpoint used on a live application.
 pub const LIVE_ENDPOINT: &str = "https://api-m.paypal.com";
@@ -427,7 +430,7 @@ mod tests {
                 .as_secs()
         );
 
-        let order_created = client
+        let (order_created, _) = client
             .create_order(
                 order,
                 HeaderParams {
